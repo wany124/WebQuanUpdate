@@ -15,6 +15,8 @@ import {
   courses,
   students,
   contactMessages,
+  events,
+  experiencePositions,
   insertUserSchema,
   insertPersonalInfoSchema,
   insertCarouselImageSchema,
@@ -22,6 +24,8 @@ import {
   insertCourseSchema,
   insertStudentSchema,
   insertContactMessageSchema,
+  insertEventSchema,
+  insertExperiencePositionSchema,
 } from "@shared/schema";
 
 const PgSession = connectPgSimple(session);
@@ -478,6 +482,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(contactMessages)
         .orderBy(desc(contactMessages.createdAt));
       res.json(messages);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Event Routes
+  app.get("/api/events", async (req, res, next) => {
+    try {
+      const allEvents = await db
+        .select()
+        .from(events)
+        .orderBy(events.order);
+      res.json(allEvents);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/events", requireAuth, async (req, res, next) => {
+    try {
+      const result = insertEventSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid input" });
+      }
+
+      const [newEvent] = await db.insert(events).values(result.data).returning();
+      res.json(newEvent);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.put("/api/events/:id", requireAuth, async (req, res, next) => {
+    try {
+      const updateSchema = insertEventSchema.partial().omit({ id: true, createdAt: true, updatedAt: true });
+      const result = updateSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid input" });
+      }
+
+      const [updated] = await db
+        .update(events)
+        .set({ ...result.data, updatedAt: new Date() })
+        .where(eq(events.id, req.params.id))
+        .returning();
+
+      res.json(updated);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/events/:id", requireAuth, async (req, res, next) => {
+    try {
+      await db.delete(events).where(eq(events.id, req.params.id));
+      res.json({ message: "Deleted" });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Experience Position Routes
+  app.get("/api/experience", async (req, res, next) => {
+    try {
+      const positions = await db
+        .select()
+        .from(experiencePositions)
+        .orderBy(experiencePositions.order);
+      res.json(positions);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/experience", requireAuth, async (req, res, next) => {
+    try {
+      const result = insertExperiencePositionSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid input" });
+      }
+
+      const [newPosition] = await db.insert(experiencePositions).values(result.data).returning();
+      res.json(newPosition);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.put("/api/experience/:id", requireAuth, async (req, res, next) => {
+    try {
+      const updateSchema = insertExperiencePositionSchema.partial().omit({ id: true, createdAt: true, updatedAt: true });
+      const result = updateSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid input" });
+      }
+
+      const [updated] = await db
+        .update(experiencePositions)
+        .set({ ...result.data, updatedAt: new Date() })
+        .where(eq(experiencePositions.id, req.params.id))
+        .returning();
+
+      res.json(updated);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/experience/:id", requireAuth, async (req, res, next) => {
+    try {
+      await db.delete(experiencePositions).where(eq(experiencePositions.id, req.params.id));
+      res.json({ message: "Deleted" });
     } catch (error) {
       next(error);
     }

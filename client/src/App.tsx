@@ -18,6 +18,8 @@ import EditorCarouselPage from "@/pages/editor-carousel-page";
 import EditorResearchPage from "@/pages/editor-research-page";
 import EditorTeachingPage from "@/pages/editor-teaching-page";
 import EditorStudentsPage from "@/pages/editor-students-page";
+import EditorEventsPage from "@/pages/editor-events-page";
+import EditorExperiencePage from "@/pages/editor-experience-page";
 
 function Router() {
   return (
@@ -36,6 +38,8 @@ function Router() {
       <ProtectedRoute path="/editor" component={EditorPage} />
       <ProtectedRoute path="/editor/personal" component={EditorPersonalPage} />
       <ProtectedRoute path="/editor/carousel" component={EditorCarouselPage} />
+      <ProtectedRoute path="/editor/events" component={EditorEventsPage} />
+      <ProtectedRoute path="/editor/experience" component={EditorExperiencePage} />
       <ProtectedRoute path="/editor/research" component={EditorResearchPage} />
       <ProtectedRoute path="/editor/teaching" component={EditorTeachingPage} />
       <ProtectedRoute path="/editor/students" component={EditorStudentsPage} />

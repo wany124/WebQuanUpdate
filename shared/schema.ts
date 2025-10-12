@@ -124,3 +124,36 @@ export const contactMessages = pgTable("contact_messages", {
 export const insertContactMessageSchema = createInsertSchema(contactMessages).omit({ id: true, createdAt: true });
 export type InsertContactMessage = z.infer<typeof insertContactMessageSchema>;
 export type ContactMessage = typeof contactMessages.$inferSelect;
+
+// Events for homepage carousel
+export const events = pgTable("events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  date: text("date").notNull(),
+  imageUrl: text("image_url").notNull(),
+  order: integer("order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type Event = typeof events.$inferSelect;
+
+// Experience timeline positions
+export const experiencePositions = pgTable("experience_positions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  jobTitle: text("job_title").notNull(),
+  company: text("company").notNull(),
+  location: text("location"),
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date"),
+  order: integer("order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertExperiencePositionSchema = createInsertSchema(experiencePositions).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertExperiencePosition = z.infer<typeof insertExperiencePositionSchema>;
+export type ExperiencePosition = typeof experiencePositions.$inferSelect;

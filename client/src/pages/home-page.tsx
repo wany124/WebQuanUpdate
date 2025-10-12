@@ -1,20 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { ImageCarousel } from "@/components/image-carousel";
+import { EventsCarousel } from "@/components/events-carousel";
+import { ExperienceTimeline } from "@/components/experience-timeline";
 import { ResearchCard } from "@/components/research-card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Loader2 } from "lucide-react";
-import type { PersonalInfo, CarouselImage, Research } from "@shared/schema";
+import type { PersonalInfo, Event, Research, ExperiencePosition } from "@shared/schema";
 
 export default function HomePage() {
   const { data: personalInfo, isLoading: infoLoading } = useQuery<PersonalInfo>({
     queryKey: ["/api/personal-info"],
   });
 
-  const { data: carouselImages = [], isLoading: carouselLoading } = useQuery<CarouselImage[]>({
-    queryKey: ["/api/carousel"],
+  const { data: events = [], isLoading: eventsLoading } = useQuery<Event[]>({
+    queryKey: ["/api/events"],
+  });
+
+  const { data: experience = [], isLoading: experienceLoading } = useQuery<ExperiencePosition[]>({
+    queryKey: ["/api/experience"],
   });
 
   const { data: featuredResearch = [], isLoading: researchLoading } = useQuery<Research[]>({
@@ -116,14 +121,26 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Carousel Section */}
-      {!carouselLoading && carouselImages.length > 0 && (
+      {/* Events Carousel Section */}
+      {!eventsLoading && events.length > 0 && (
         <section className="py-12 md:py-16 bg-slate-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
               RECENT & UPCOMING TALKS
             </h2>
-            <ImageCarousel images={carouselImages} />
+            <EventsCarousel events={events} />
+          </div>
+        </section>
+      )}
+
+      {/* Experience Timeline Section */}
+      {!experienceLoading && experience.length > 0 && (
+        <section className="py-12 md:py-16 bg-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-12">
+              Professional Experience
+            </h2>
+            <ExperienceTimeline positions={experience} />
           </div>
         </section>
       )}

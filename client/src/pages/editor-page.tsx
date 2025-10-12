@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { Home, FileText, BookOpen, Users, Image as ImageIcon, LogOut } from "lucide-react";
+import { Home, FileText, BookOpen, Users, Image as ImageIcon, LogOut, Calendar, Briefcase } from "lucide-react";
 
 interface EditorLayoutProps {
   children: React.ReactNode;
@@ -15,6 +15,8 @@ function EditorLayout({ children }: EditorLayoutProps) {
     { path: "/editor", label: "Dashboard", icon: Home },
     { path: "/editor/personal", label: "Personal Info", icon: Users },
     { path: "/editor/carousel", label: "Carousel", icon: ImageIcon },
+    { path: "/editor/events", label: "Events", icon: Calendar },
+    { path: "/editor/experience", label: "Experience", icon: Briefcase },
     { path: "/editor/research", label: "Research", icon: FileText },
     { path: "/editor/teaching", label: "Teaching", icon: BookOpen },
     { path: "/editor/students", label: "Students", icon: Users },
@@ -88,6 +90,22 @@ export default function EditorPage() {
               <ImageIcon className="h-8 w-8 text-primary mb-3" />
               <h2 className="text-xl font-semibold mb-2">Carousel Images</h2>
               <p className="text-sm text-muted-foreground">Manage homepage slideshow images</p>
+            </div>
+          </Link>
+
+          <Link href="/editor/events">
+            <div className="p-6 bg-card border border-card-border rounded-lg hover:shadow-lg transition-shadow cursor-pointer" data-testid="card-events">
+              <Calendar className="h-8 w-8 text-primary mb-3" />
+              <h2 className="text-xl font-semibold mb-2">Events</h2>
+              <p className="text-sm text-muted-foreground">Manage events carousel with images</p>
+            </div>
+          </Link>
+
+          <Link href="/editor/experience">
+            <div className="p-6 bg-card border border-card-border rounded-lg hover:shadow-lg transition-shadow cursor-pointer" data-testid="card-experience">
+              <Briefcase className="h-8 w-8 text-primary mb-3" />
+              <h2 className="text-xl font-semibold mb-2">Experience</h2>
+              <p className="text-sm text-muted-foreground">Manage professional timeline</p>
             </div>
           </Link>
 
