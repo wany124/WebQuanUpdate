@@ -3,11 +3,10 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { EventsCarousel } from "@/components/events-carousel";
 import { ExperienceTimeline } from "@/components/experience-timeline";
-import { ResearchCard } from "@/components/research-card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Loader2 } from "lucide-react";
-import type { PersonalInfo, Event, Research, ExperiencePosition } from "@shared/schema";
+import type { PersonalInfo, Event, ExperiencePosition } from "@shared/schema";
 
 export default function HomePage() {
   const { data: personalInfo, isLoading: infoLoading } = useQuery<PersonalInfo>({
@@ -20,10 +19,6 @@ export default function HomePage() {
 
   const { data: experience = [], isLoading: experienceLoading } = useQuery<ExperiencePosition[]>({
     queryKey: ["/api/experience"],
-  });
-
-  const { data: featuredResearch = [], isLoading: researchLoading } = useQuery<Research[]>({
-    queryKey: ["/api/research/featured"],
   });
 
   if (infoLoading) {
@@ -141,27 +136,6 @@ export default function HomePage() {
               Professional Experience
             </h2>
             <ExperienceTimeline positions={experience} />
-          </div>
-        </section>
-      )}
-
-      {/* Featured Research */}
-      {!researchLoading && featuredResearch.length > 0 && (
-        <section className="py-12 md:py-16 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-8">
-              Featured Research
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {featuredResearch.map((research) => (
-                <ResearchCard key={research.id} research={research} />
-              ))}
-            </div>
-            <div className="text-center">
-              <Button variant="default" size="lg" asChild data-testid="button-view-all-research">
-                <Link href="/research">View All Research</Link>
-              </Button>
-            </div>
           </div>
         </section>
       )}
