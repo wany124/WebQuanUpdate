@@ -1,0 +1,58 @@
+Please redesign all pages to have a more organic, professional look that avoids the blocky AI-generated aesthetic. Here are the specific changes:
+
+## GENERAL DESIGN IMPROVEMENTS (Apply to all pages):
+
+1. Remove all distinct card/box containers with visible backgrounds
+2. Use full-width sections with subtle transitions between them
+3. Implement overlapping elements and layered designs
+4. Use varied spacing and asymmetric layouts
+5. Add subtle gradients instead of flat color blocks
+6. Integrate content directly into the background with natural flow
+
+## HOME PAGE REDESIGN:
+
+Current issues: Large centered title block, separate bio card
+New design should have:
+- Hero section with title integrated into background (no box)
+- Bio information flows naturally below without container boxes
+- Profile photo positioned with subtle shadow/border only
+- Interests, Education, Experience columns laid out directly on page background
+- Use horizontal divider lines instead of boxes to separate sections
+- Add subtle fade/gradient effects between sections
+
+## BIOGRAPHY PAGE REDESIGN:
+
+Current issues: Centered "BIOGRAPHY" label, rigid card layout
+New design should have:
+- Remove the floating "BIOGRAPHY" label box at top
+- Integrate photo with text in a magazine-style layout
+- Text wraps naturally around or beside photo (not in separate boxes)
+- Section headers (Interests, Education, etc.) use simple typography without boxes
+- Content lists flow naturally with subtle indentation and spacing
+- Use the page background directly, no container cards
+
+## RESEARCH PAGE REDESIGN:
+
+Current issues: Centered "RESEARCH" label, separate boxes for each project
+New design should have:
+- Remove the floating "RESEARCH" label box
+- Each research item is a full-width row with:
+  * Image on left (no border, just subtle shadow)
+  * Content on right flowing naturally
+  * Thin horizontal divider lines between items (not boxes)
+  * White/light background with content directly on it
+- Dates, tags, and links integrated into text flow
+- No rounded corners or card borders
+
+## STYLING GUIDELINES:
+
+✓ DO use: natural spacing, subtle shadows, thin divider lines, asymmetric layouts
+✗ DON'T use: cards, boxes, floating labels, rounded corner containers, distinct background colors for sections
+
+Reference the earlier example images where:
+- Timeline has vertical line with dots, no boxes
+- Research items are horizontal rows with dividers
+- Text and images integrate naturally
+- Backgrounds transition smoothly
+
+The goal is to make it look like a professionally designed academic website, not a templated AI design.
