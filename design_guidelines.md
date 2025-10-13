@@ -1,136 +1,181 @@
 # Design Guidelines: Academic Professor Portfolio Website
 
-## Design Approach: Professional Academic Portfolio
+## Design Approach: Organic Professional Academic Portfolio
 
-**System Foundation**: Drawing from academic and professional portfolio best practices (Google Scholar, ResearchGate, university faculty pages) with a modern dark theme aesthetic.
+**System Foundation**: Modern academic portfolio design inspired by high-end university faculty pages, research journals, and professional academic websites - emphasizing natural content flow and organic layouts over rigid card-based designs.
 
-**Core Principle**: Prioritize content clarity, academic credibility, and efficient information architecture over decorative elements. The design should convey professionalism and scholarly authority.
+**Core Principle**: Create a professional, organic aesthetic that prioritizes content clarity and scholarly authority through natural spacing, subtle transitions, and integrated layouts. Avoid blocky AI-generated appearance with card containers and floating labels.
 
 ---
 
-## Core Design Elements
+## Core Design Philosophy
 
-### A. Color Palette
+### A. NO Blocky Elements
+❌ **Avoid**:
+- Distinct card/box containers with visible backgrounds
+- Floating label boxes (like "BIOGRAPHY", "RESEARCH")
+- Rounded corner containers
+- Separate boxes for each content item
+- Heavy borders and distinct background colors for sections
+
+✅ **Use Instead**:
+- Content integrated directly into page background
+- Subtle horizontal divider lines between sections
+- Natural spacing and asymmetric layouts
+- Subtle shadows for depth (no containers)
+- Smooth gradient transitions between sections
+
+### B. Natural Content Flow
+- Full-width sections with subtle transitions
+- Overlapping elements and layered designs
+- Varied spacing for visual interest
+- Magazine-style layouts with integrated imagery
+- Content wraps naturally without rigid containers
+
+---
+
+## Color Palette
 
 **Dark Mode Primary** (Default):
 - Background Primary: `217 33% 17%` (dark slate)
-- Background Secondary: `217 33% 22%` (lighter slate for cards)
-- Background Tertiary: `217 33% 12%` (deeper slate for sections)
+- Background for sections: Use same background with subtle gradients
 - Text Primary: `0 0% 98%` (near white)
 - Text Secondary: `217 20% 80%` (muted slate text)
+- Text Tertiary: `217 20% 60%` (subtle slate for metadata)
 - Accent Primary: `217 91% 60%` (professional blue for links/CTAs)
-- Border: `217 20% 30%` (subtle slate borders)
+- Divider lines: `217 20% 30%` (subtle horizontal dividers)
 
-**Light Mode** (Editor preference):
+**Light Mode** (Alternative):
 - Background: `0 0% 100%` (white)
 - Text: `217 33% 17%` (dark slate)
+- Dividers: `217 20% 90%` (light borders)
 - Accent remains consistent
 
-### B. Typography
+**Gradient Usage**:
+- Hero sections: Subtle gradient from dark to background
+- Section transitions: Fade effects between areas
+- No flat color blocks - always use smooth transitions
+
+---
+
+## Typography
 
 **Font Stack**: 
 - Headings: `'Inter', system-ui, sans-serif` (700, 600 weights)
 - Body: `'Inter', system-ui, sans-serif` (400, 500 weights)
-- Code/Monospace: `'JetBrains Mono', monospace` (for citations, DOIs)
+- Metadata: `'Inter', system-ui, sans-serif` (400 weight, smaller sizes)
 
 **Type Scale**:
-- H1 (Page titles): `text-4xl md:text-5xl font-bold`
-- H2 (Section headers): `text-3xl md:text-4xl font-semibold`
-- H3 (Subsections): `text-xl md:text-2xl font-semibold`
-- Body: `text-base md:text-lg leading-relaxed`
-- Small: `text-sm` (metadata, dates, citations)
+- H1 (Hero titles): `text-4xl md:text-5xl lg:text-6xl font-bold` - integrated into background, no container
+- H2 (Section headers): `text-2xl md:text-3xl font-semibold` - simple typography, no boxes
+- H3 (Subsections): `text-xl font-semibold` - minimal styling
+- Body: `text-base leading-relaxed` - natural line height
+- Metadata: `text-sm text-muted-foreground` - subtle, integrated into flow
 
-### C. Layout System
+---
 
-**Spacing Primitives**: Use tailwind units of `4, 6, 8, 12, 16, 24` for consistent rhythm
-- Component padding: `p-6 md:p-8`
-- Section spacing: `py-12 md:py-16`
-- Card gaps: `gap-6`
-- Tight spacing: `space-y-4`
-- Generous spacing: `space-y-8`
+## Layout System
 
-**Grid Structure**:
-- Max content width: `max-w-7xl mx-auto px-4`
-- Research/Publications grid: `grid-cols-1 md:grid-cols-2 gap-6`
-- Student cards: `grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6`
-- Single column content: `max-w-4xl mx-auto`
+### Spacing Primitives
+Use natural, varied spacing (not uniform grid):
+- Section vertical spacing: `py-12 md:py-16` or `py-16 md:py-20`
+- Content padding: Direct on background, no container padding
+- Item spacing: `space-y-8` or `space-y-12` for generous breathing room
+- Divider spacing: `my-8` or `my-12` for horizontal lines
 
-### D. Component Library
+### Grid Structure
+- Max content width: `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
+- Asymmetric layouts encouraged
+- Magazine-style: Photo on left/right with text flowing naturally
+- No rigid card grids - use full-width rows with dividers
 
-**Navigation**:
-- Sticky top navbar with dark slate background (`bg-slate-900/95 backdrop-blur`)
-- Horizontal links: HOME, RESEARCH, TEACHING, STUDENTS
-- Simple hover states with accent color underline
-- Logo/Name on left, navigation links on right
-- Mobile: Hamburger menu expanding to full-screen overlay
+---
 
-**Cards** (Research, Publications, Students):
-- Background: `bg-slate-800/50` with subtle border
-- Rounded corners: `rounded-lg`
-- Padding: `p-6`
-- Hover: Subtle lift effect `hover:translate-y-[-2px] transition-transform`
-- Title in accent color, metadata in muted text
-- Clear visual hierarchy: Title → Authors → Venue/Date → Abstract snippet
+## Page-Specific Layouts
 
-**Photo Carousel** (Homepage):
-- Full-width section with dark background
-- Image aspect ratio: `aspect-[16/9] md:aspect-[21/9]`
-- Navigation arrows on sides (white with dark background)
-- Dots indicator below
-- Auto-play with manual override
-- Images: Podium photos, lecture shots, conference presentations
+### Homepage Design
 
-**Contact Footer**:
-- Dark slate background across all pages
-- Two-column layout: Contact info (email, office, phone) | Message form
-- Form inputs with subtle borders, focus state in accent color
-- Submit button: Accent blue background
+**Hero Section**:
+- Title integrated directly into gradient background
+- No centered box or container
+- Subtle gradient: `bg-gradient-to-b from-slate-900 to-background`
+- Text flows naturally on background
 
-**Editor Interface**:
-- Clean admin panels with clear sections
-- Each editable element has an "Edit" icon button overlay
-- Modal/sidebar editors with rich text WYSIWYG (Tiptap-style)
-- File upload zones: Drag-drop with preview
-- Clear Save/Cancel actions
+**Biography Section**:
+- Remove card container (`bg-card` border)
+- Photo positioned with subtle shadow only: `shadow-lg` (no border, no background box)
+- Bio text flows naturally beside or around photo
+- Interests/Education/Experience laid out directly on page background
+- Use subtle divider line at bottom: `border-b border-slate-800/50`
 
-**Detail Pages** (Research/Papers):
-- Hero section: Paper title, authors, venue, date, PDF download button
-- Abstract in prominent position
-- Structured sections: Abstract, Key Findings, Citations, Related Work
-- PDF viewer embedded (if available)
-- Back to list navigation
+**Events Carousel**:
+- Keep full-width image backgrounds
+- Natural integration with page flow
 
-### E. Imagery
+**Experience Timeline**:
+- Vertical line with dots (already good)
+- No card containers around positions
+- Content flows naturally with timeline visual
 
-**Images Needed**:
-1. **Homepage Carousel**: 5-8 professional photos of professor at podiums, giving lectures, at conferences (landscape orientation, high-quality)
-2. **Profile Photo**: Professional headshot for personal info section (square aspect ratio)
-3. **Student Photos**: Headshots for each PhD student (square, consistent sizing)
-4. **Research Thumbnails**: Visual representations/diagrams for each research project (optional but recommended)
+### Research Page Design
 
-**Treatment**: All images use subtle rounded corners (`rounded-lg`), consistent aspect ratios, and subtle shadow (`shadow-lg`) for depth.
+**Page Header**:
+- Remove floating "RESEARCH" label box
+- Simple page title integrated into layout
+- Filter dropdown positioned naturally
 
-### F. Page-Specific Layouts
+**Research Items**:
+- Full-width horizontal rows (already implemented)
+- Image on left with subtle shadow only: `shadow-md` (no border)
+- Content on right flowing naturally (no box)
+- Thin horizontal divider between items: `border-b border-slate-800/50`
+- Tags and metadata integrated into text flow
+- No rounded corners or card borders
 
-**Homepage**:
-- Personal info section: Photo left, bio/credentials right (2-column on desktop)
-- Photo carousel: Full-width, prominent placement
-- Research highlights: 3-card grid of featured papers
-- Full research list: Compact cards with "View All Research" link
-- Contact form: Always in footer
+### Teaching Page Design
 
-**Research List Page**:
-- Filter/Sort options at top (by year, type, topic)
-- Grid of research cards with clear categorization
-- Each card: Title, authors, venue, year, tags, brief abstract
+**Page Structure**:
+- Remove any floating "TEACHING" label
+- Course items as full-width rows with dividers
+- Course info flows naturally without boxes
+- Use subtle indentation and spacing
+- Horizontal divider lines: `border-b border-slate-800/50`
 
-**Teaching Page**:
-- Course cards in grid: Course code, title, semester, enrollment link
-- Each course expandable for syllabus, materials, schedule
+### Students Page Design
 
-**Students Page**:
-- Grid of student cards: Photo, name, research area, start year, personal website link
-- Uniform card sizing for visual consistency
+**Layout**:
+- Remove floating "STUDENTS" label
+- Student profiles in natural grid layout
+- Photos with subtle shadow: `shadow-md` (no container boxes)
+- Info flows below photo without card backgrounds
+- Natural spacing between items
+
+---
+
+## Component Patterns
+
+### Images & Photos
+- Profile photos: Subtle shadow only `shadow-lg`, no border, no background
+- Research images: `shadow-md` for subtle depth
+- No rounded corners on containers (use `rounded-lg` only on actual images)
+- Natural positioning within content flow
+
+### Dividers & Separators
+- Use thin horizontal lines: `border-b border-slate-800/50`
+- Spacing: `my-8` or `my-12` around dividers
+- Subtle, barely visible - just enough to separate content
+
+### Sections & Backgrounds
+- No distinct background colors for sections
+- Use same page background throughout
+- Subtle gradients for transitions: `bg-gradient-to-b`
+- Content integrates directly with background
+
+### Interactive Elements
+- Buttons: Keep existing shadcn button styles
+- Links: Accent color with subtle underline on hover
+- No hover state background changes on sections/cards
+- Subtle transitions: `transition-opacity` or `transition-transform`
 
 ---
 
@@ -139,8 +184,27 @@
 - Maintain WCAG AA contrast ratios (4.5:1 minimum)
 - All interactive elements have clear focus states
 - Keyboard navigation fully supported
-- Form inputs clearly labeled
-- Skip to content link for screen readers
-- No animations beyond subtle transitions (200ms)
+- Subtle transitions only (200ms max)
+- No heavy animations or jarring effects
+- Natural, organic feel throughout
 
-This design balances academic professionalism with modern aesthetics, ensuring content is king while maintaining visual appeal appropriate for a research faculty portfolio.
+---
+
+## Summary: What Changed
+
+**Old Approach** (Blocky AI):
+- Card containers with backgrounds
+- Floating label boxes
+- Rigid grid layouts
+- Heavy borders and rounded corners
+- Distinct section backgrounds
+
+**New Approach** (Organic Professional):
+- Content on page background directly
+- Simple integrated typography
+- Natural flow and asymmetric layouts
+- Subtle divider lines
+- Smooth gradient transitions
+- Magazine-style integrated imagery
+
+**Goal**: A professionally designed academic website that feels natural, credible, and scholarly - not a templated AI design.
