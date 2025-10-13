@@ -80,9 +80,9 @@ export default function ResearchPage() {
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-start">
                       {/* Image Section - Left Side with subtle shadow only */}
                       <div className="md:col-span-2">
-                        {research.imageUrl ? (
+                        {research.thumbnailUrl ? (
                           <img 
-                            src={research.imageUrl} 
+                            src={research.thumbnailUrl} 
                             alt={research.title}
                             className="w-full h-64 md:h-80 object-cover shadow-lg"
                             data-testid={`img-research-${research.id}`}
@@ -108,16 +108,16 @@ export default function ResearchPage() {
                           </p>
                         )}
 
-                        {/* Publication and Year - integrated into text flow */}
+                        {/* Venue and Date - integrated into text flow */}
                         <div className="flex flex-wrap gap-2 items-center mb-4">
-                          {research.publication && (
+                          {research.venue && (
                             <span className="text-base font-medium text-foreground" data-testid={`text-publication-${research.id}`}>
-                              {research.publication}
+                              {research.venue}
                             </span>
                           )}
-                          {research.year && (
+                          {research.date && (
                             <span className="text-base text-muted-foreground" data-testid={`text-year-${research.id}`}>
-                              • {research.year}
+                              • {research.date}
                             </span>
                           )}
                         </div>
@@ -134,10 +134,10 @@ export default function ResearchPage() {
                           ))}
                         </div>
 
-                        {/* Description */}
-                        {research.description && (
+                        {/* Abstract */}
+                        {research.abstract && (
                           <p className="text-foreground leading-relaxed mb-6" data-testid={`text-description-${research.id}`}>
-                            {research.description}
+                            {research.abstract}
                           </p>
                         )}
 
@@ -148,9 +148,9 @@ export default function ResearchPage() {
                               Learn More
                             </Link>
                           </Button>
-                          {research.doiLink && (
+                          {research.externalLink && (
                             <Button variant="outline" asChild data-testid={`button-doi-${research.id}`}>
-                              <a href={research.doiLink} target="_blank" rel="noopener noreferrer">
+                              <a href={research.externalLink} target="_blank" rel="noopener noreferrer">
                                 DOI Link
                                 <ExternalLink className="ml-2 h-4 w-4" />
                               </a>

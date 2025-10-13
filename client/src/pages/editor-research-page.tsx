@@ -84,6 +84,7 @@ export default function EditorResearchPage() {
       pdfUrl: item.pdfUrl || "",
       externalLink: item.externalLink || "",
       thumbnailUrl: item.thumbnailUrl || "",
+      citation: item.citation || "",
       category: item.category,
       tags: item.tags || [],
       featured: item.featured || false,
@@ -181,6 +182,38 @@ export default function EditorResearchPage() {
                         data-testid="input-tags"
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="citation" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Citation (formatted bibliographic reference)</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} value={field.value || ""} className="min-h-[80px]" placeholder="Author(s). (Year). Title. Journal, Volume(Issue), Pages. DOI" data-testid="input-citation" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name="pdfUrl" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>PDF URL</FormLabel>
+                      <FormControl><Input {...field} value={field.value || ""} placeholder="https://..." data-testid="input-pdf-url" /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="externalLink" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>DOI / External Link</FormLabel>
+                      <FormControl><Input {...field} value={field.value || ""} placeholder="https://doi.org/..." data-testid="input-external-link" /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <FormField control={form.control} name="thumbnailUrl" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image/Diagram URL</FormLabel>
+                    <FormControl><Input {...field} value={field.value || ""} placeholder="https://..." data-testid="input-thumbnail-url" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />

@@ -71,7 +71,12 @@ Preferred communication style: Simple, everyday language.
 - Users (admin authentication)
 - Personal Info (singleton - professor details)
 - Carousel Images (homepage slideshow)
-- Research (publications with metadata, tags, categories)
+- Events (homepage events carousel with images)
+- Experience (professional timeline positions)
+- Research (publications with metadata, tags, categories, citations)
+  - Citation field for formatted bibliographic citations with copy-to-clipboard
+  - PDF download support
+  - DOI/external links
 - Courses (teaching information)
 - Students (current and alumni PhD students)
 - Contact Messages (form submissions)

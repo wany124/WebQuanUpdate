@@ -63,6 +63,7 @@ export const research = pgTable("research", {
   pdfUrl: text("pdf_url"),
   externalLink: text("external_link"),
   thumbnailUrl: text("thumbnail_url"),
+  citation: text("citation"), // formatted citation text for copy-to-clipboard
   category: text("category").notNull(),
   tags: text("tags").array(),
   featured: boolean("featured").default(false),
