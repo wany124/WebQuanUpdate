@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, FileText } from "lucide-react";
 import { Loader2 } from "lucide-react";
@@ -16,19 +15,19 @@ export default function TeachingPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Header */}
-      <div className="bg-gradient-to-b from-slate-900 to-background py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* Header - Title integrated into gradient background */}
+      <div className="bg-gradient-to-b from-slate-900 to-background py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Teaching</h1>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl">
             Current and recent courses in actuarial science, data science, and computational statistics.
           </p>
         </div>
       </div>
 
-      {/* Courses */}
+      {/* Courses - Natural flow without card containers */}
       <section className="py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {isLoading ? (
             <div className="flex items-center justify-center min-h-[40vh]">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -38,28 +37,29 @@ export default function TeachingPage() {
               <p className="text-muted-foreground text-lg">No courses listed at this time.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {courses.map((course) => (
-                <Card key={course.id} className="hover:shadow-lg transition-shadow" data-testid={`card-course-${course.id}`}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-2">
+            <div className="space-y-0">
+              {courses.map((course, index) => (
+                <div key={course.id}>
+                  {/* Course Item - flowing naturally on background */}
+                  <div className="py-8" data-testid={`card-course-${course.id}`}>
+                    <div className="flex items-start justify-between gap-4 mb-3">
                       <div>
-                        <CardTitle className="text-xl" data-testid={`text-title-${course.id}`}>
+                        <h3 className="text-2xl font-bold text-foreground" data-testid={`text-title-${course.id}`}>
                           {course.courseCode}: {course.title}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1" data-testid={`text-semester-${course.id}`}>
+                        </h3>
+                        <p className="text-base text-muted-foreground mt-2" data-testid={`text-semester-${course.id}`}>
                           {course.semester}
                         </p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                    
                     {course.description && (
-                      <p className="text-sm text-foreground leading-relaxed" data-testid={`text-description-${course.id}`}>
+                      <p className="text-foreground leading-relaxed mb-4 max-w-3xl" data-testid={`text-description-${course.id}`}>
                         {course.description}
                       </p>
                     )}
-                    <div className="flex flex-wrap gap-2">
+                    
+                    <div className="flex flex-wrap gap-3">
                       {course.syllabusUrl && (
                         <Button variant="outline" size="sm" asChild data-testid={`button-syllabus-${course.id}`}>
                           <a href={course.syllabusUrl} target="_blank" rel="noopener noreferrer">
@@ -77,8 +77,13 @@ export default function TeachingPage() {
                         </Button>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  
+                  {/* Thin horizontal divider between courses */}
+                  {index < courses.length - 1 && (
+                    <div className="border-b border-border/50"></div>
+                  )}
+                </div>
               ))}
             </div>
           )}
