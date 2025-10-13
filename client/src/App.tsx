@@ -33,6 +33,7 @@ function Router() {
       
       {/* Auth */}
       <Route path="/auth" component={AuthPage} />
+      <Route path="/login" component={AuthPage} />
       
       {/* Protected Editor Pages */}
       <ProtectedRoute path="/editor" component={EditorPage} />
