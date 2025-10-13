@@ -65,7 +65,7 @@ Preferred communication style: Simple, everyday language.
 **Database ORM**: 
 - Drizzle ORM for type-safe database queries
 - Schema-first approach with Zod validation
-- Support for PostgreSQL via Neon serverless driver
+- Support for PostgreSQL via standard `pg` driver (node-postgres)
 
 **Data Models**:
 - Users (admin authentication)
@@ -84,8 +84,8 @@ Preferred communication style: Simple, everyday language.
 ### External Dependencies
 
 **Database**: 
-- Neon Serverless PostgreSQL
-- WebSocket connection pooling for serverless environments
+- Local PostgreSQL (Replit-managed)
+- Standard PostgreSQL connection via `pg` driver
 - Environment variable: `DATABASE_URL`
 
 **Object Storage**:
