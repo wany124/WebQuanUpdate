@@ -90,10 +90,49 @@ will work against a hosted database in Phase 2.
 
 ## Phase 2 — Deploy to a temporary/staging environment
 
-Recommended: a Node host with a managed PostgreSQL add-on — Render,
-Railway, or Fly.io all work well and match how this app is already
-built (standard `pg`/Express/Node, no vendor-specific SDKs required
-for the base app).
+### Recommended stack for this project
+
+**Render (web service) + Neon (Postgres) + Cloudflare R2 (uploads).**
+This is $0/month to start (upgrade the Render web service to ~$7/month
+later if you want to remove cold starts — see below), has no
+credit-card-required signup on the free tiers, and lines up with the
+SSL auto-config and S3-compatible storage already built into this
+codebase.
+
+- **Render, free web service**: deploys straight from this GitHub repo
+  (`npm run build` / `npm start`, already configured), free HTTPS on a
+  custom domain. The only real downside: free services spin down after
+  15 minutes idle and take about a minute to cold-start on the next
+  request. For a low-traffic personal site this is usually acceptable;
+  if it bothers you, Render's Starter plan ($7/month) removes it.
+- **Neon, free Postgres**: unlike Render's own free Postgres (which
+  **auto-deletes your database 30 days after creation** — a real trap
+  for something you intend to keep long-term), Neon's free tier is
+  permanent, with no expiration or deletion risk. 0.5 GB storage and
+  100 compute-hours/month is generous for a low-traffic personal
+  site's text/metadata (images/PDFs live in R2, not the database).
+  Point Render's `DATABASE_URL` at the Neon connection string; nothing
+  else changes since it's still standard Postgres.
+- **Cloudflare R2, free tier**: 10 GB storage, no egress fees, ever.
+  This is exactly what `S3_BUCKET`/`S3_ENDPOINT` in `.env.example` are
+  for — R2 speaks the S3 API, so the object-storage support already in
+  `server/objectStorage.ts` works against it with zero code changes.
+  This avoids the ephemeral-disk problem entirely rather than working
+  around it with a persistent volume.
+
+If you'd rather manage everything in one dashboard instead of three
+accounts, **Railway** is a solid single-vendor alternative: web
+service + Postgres + a persistent volume (for `uploads/`, mounted at
+the app's working directory) all live under one project, at roughly
+$5-15/month for a hobby-scale app. It doesn't have an ongoing free
+tier (only a one-time trial credit for new accounts), so budget for
+that if you go this route. Fly.io is a better fit if you specifically
+need global multi-region low latency, which a personal academic site
+almost never does — it also currently has no free tier and its
+cheapest managed Postgres option is comparatively expensive, with the
+cheap self-managed option putting backups/maintenance on you.
+
+### Steps
 
 1. **Push the code** to GitHub (already done for this repo) and
    connect the host to the `main` branch (or a dedicated `staging`
@@ -134,10 +173,11 @@ for the base app).
    - **Quick path (works with zero code changes):** mount a
      *persistent* disk/volume at the app's working directory so the
      runtime path is `<app working directory>/uploads`, then copy your
-     archived `uploads/` folder onto it. Render and Fly.io both support
-     persistent volumes; plain Railway services do not (their disks
-     are ephemeral and reset on every deploy/restart), so if you use
-     Railway you should use the object-storage path below instead.
+     archived `uploads/` folder onto it. Render, Fly.io, and Railway
+     all support persistent volumes on paid plans — but note Render's
+     **free** web services specifically do not support persistent
+     disks (only paid ones do), so this path requires a paid plan on
+     any of these three.
    - **Durable path (recommended for anything you'll keep long-term):**
      move uploads to S3 or an S3-compatible service. This is now
      built into the app (see below) — set the `S3_*` environment
