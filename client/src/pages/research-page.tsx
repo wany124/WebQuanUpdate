@@ -22,9 +22,13 @@ export default function ResearchPage() {
     queryKey: ["/api/research"],
   });
 
+  // Defensive against malformed/legacy data: the schema declares category
+  // as string[], but jsonb columns aren't enforced at the DB level, so a
+  // stray string value here shouldn't be able to crash the whole page.
   const getCategories = (r: Research): string[] => {
-    if (Array.isArray(r.category)) return r.category.map((c) => String(c).trim());
-    if (typeof r.category === "string" && r.category.length > 0) return [r.category.trim()];
+    const raw: unknown = r.category;
+    if (Array.isArray(raw)) return raw.map((c) => String(c).trim());
+    if (typeof raw === "string" && raw.length > 0) return [raw.trim()];
     return [];
   };
 
