@@ -9,7 +9,10 @@
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "seed": "tsx scripts/seed.ts",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:backup": "bash scripts/backup-db.sh",
+    "db:restore": "bash scripts/restore-db.sh",
+    "migrate:uploads": "tsx scripts/migrate-uploads-to-s3.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.908.0",
