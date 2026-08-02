@@ -22,11 +22,17 @@ export default function ResearchPage() {
     queryKey: ["/api/research"],
   });
 
-  const categories = ["all", ...Array.from(new Set(allResearch.flatMap(r => r.category.map(c => c.trim())))).sort()];
-  
+  const getCategories = (r: Research): string[] => {
+    if (Array.isArray(r.category)) return r.category.map((c) => String(c).trim());
+    if (typeof r.category === "string" && r.category.length > 0) return [r.category.trim()];
+    return [];
+  };
+
+  const categories = ["all", ...Array.from(new Set(allResearch.flatMap(getCategories))).sort()];
+
   const filteredResearch = categoryFilter === "all"
     ? allResearch
-    : allResearch.filter(r => r.category.some(c => c.trim() === categoryFilter));
+    : allResearch.filter((r) => getCategories(r).includes(categoryFilter));
 
 
   return (
@@ -126,13 +132,13 @@ export default function ResearchPage() {
 
                         {/* Category and Tags - flowing with content */}
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {research.category?.map((cat, i) => (
+                          {getCategories(research).map((cat, i) => (
                             <Badge
                               key={`${research.id}-cat-${i}`}
                               variant="default"
                               data-testid={`badge-category-${research.id}-${i}`}
                             >
-                              {cat.trim()}
+                              {cat}
                             </Badge>
                           ))}
 
