@@ -3,14 +3,17 @@ import { useRoute, Link } from "wouter";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import { FileText, ExternalLink, ArrowLeft, Copy, Check } from "lucide-react";
+import { FileText, ExternalLink, ArrowLeft, Copy, Check, Eye, Download } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import type { Research } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useResearchAnalytics } from "@/hooks/use-research-analytics";
 
 export default function ResearchDetailPage() {
+  const { trackView, trackDownload } = useResearchAnalytics();
+
   const [, params] = useRoute("/research/:id");
   const researchId = params?.id;
   const { toast } = useToast();
@@ -20,6 +23,13 @@ export default function ResearchDetailPage() {
     queryKey: ["/api/research", researchId],
     enabled: !!researchId,
   });
+
+  // Track view when page loads
+  useEffect(() => {
+    if (research?.id) {
+      trackView(research.id);
+    }
+  }, [research?.id, trackView]);
 
   const copyCitation = () => {
     if (research?.citation) {
@@ -60,9 +70,9 @@ export default function ResearchDetailPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Header - integrated into gradient background */}
-      <div className="bg-gradient-to-b from-slate-900 to-background py-12 md:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Header — solid dark navy matching navbar for continuity */}
+      <div className="relative py-12 md:py-16 bg-[#2c3340]">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button variant="ghost" size="sm" asChild className="mb-6" data-testid="button-back">
             <Link href="/research">
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -89,7 +99,7 @@ export default function ResearchDetailPage() {
           <div className="flex flex-wrap gap-3">
             {research.pdfUrl && (
               <Button variant="default" asChild data-testid="button-download-pdf">
-                <a href={research.pdfUrl} target="_blank" rel="noopener noreferrer">
+                <a href={research.pdfUrl} target="_blank" rel="noopener noreferrer" onClick={()=>trackDownload(research.id)}>
                   <FileText className="h-4 w-4 mr-2" />
                   Download PDF
                 </a>
@@ -173,6 +183,27 @@ export default function ResearchDetailPage() {
               </div>
             </>
           )}
+
+          {/* Divider */}
+          <div className="border-b border-border/50"></div>
+
+          {/* Analytics - View and Download Counts */}
+          <div>
+            <div className="flex items-center gap-6 text-muted-foreground">
+              <div className="flex items-center gap-2" data-testid="analytics-views">
+                <Eye className="h-5 w-5" />
+                <span className="text-sm">
+                  <span className="font-semibold text-foreground">{research.viewCount?.toLocaleString() || 0}</span> views
+                </span>
+              </div>
+              <div className="flex items-center gap-2" data-testid="analytics-downloads">
+                <Download className="h-5 w-5" />
+                <span className="text-sm">
+                  <span className="font-semibold text-foreground">{research.downloadCount?.toLocaleString() || 0}</span> downloads
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { pool, db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import { ObjectStorageService } from "./objectStorage";
@@ -16,10 +16,12 @@ import {
   students,
   contactMessages,
   events,
+  pastTalks,
   experiencePositions,
   insertUserSchema,
   insertPersonalInfoSchema,
   insertCarouselImageSchema,
+  insertPastTalkSchema,
   insertResearchSchema,
   insertCourseSchema,
   insertStudentSchema,
@@ -27,6 +29,9 @@ import {
   insertEventSchema,
   insertExperiencePositionSchema,
 } from "@shared/schema";
+import { object } from "zod";
+
+
 
 const PgSession = connectPgSimple(session);
 const upload = multer({ storage: multer.memoryStorage() });
@@ -65,38 +70,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Auth Routes
-  app.post("/api/register", async (req, res, next) => {
-    try {
-      const result = insertUserSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid input" });
-      }
-
-      const existingUser = await db
-        .select()
-        .from(users)
-        .where(eq(users.username, result.data.username))
-        .limit(1);
-
-      if (existingUser.length > 0) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-
-      const hashedPassword = await bcrypt.hash(result.data.password, 10);
-      const [newUser] = await db
-        .insert(users)
-        .values({
-          username: result.data.username,
-          password: hashedPassword,
-        })
-        .returning();
-
-      req.session.userId = newUser.id;
-      res.json({ id: newUser.id, username: newUser.username });
-    } catch (error) {
-      next(error);
-    }
-  });
 
   app.post("/api/login", async (req, res, next) => {
     try {
@@ -255,6 +228,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/carousel/:id", requireAuth, async (req, res, next) => {
+    try {
+      const result = insertCarouselImageSchema.partial().omit({ id: true, createdAt: true, updatedAt: true }).safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid input" });
+      }
+
+      const [updated] = await db
+        .update(carouselImages)
+        .set({ ...result.data, updatedAt: new Date() })
+        .where(eq(carouselImages.id, req.params.id))
+        .returning();
+
+      res.json(updated);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+
   app.delete("/api/carousel/:id", requireAuth, async (req, res, next) => {
     try {
       await db.delete(carouselImages).where(eq(carouselImages.id, req.params.id));
@@ -263,6 +256,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       next(error);
     }
   });
+
+  // GET /api/talks - Get all past talks
+app.get("/api/talks", async (req, res, next) => {
+  try {
+    const talks = await db
+      .select()
+      .from(pastTalks)
+      .orderBy(desc(pastTalks.date));
+
+    res.json(talks);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/talks/:id - Get single talk
+app.get("/api/talks/:id", async (req, res, next) => {
+  try {
+    const [talk] = await db
+      .select()
+      .from(pastTalks)
+      .where(eq(pastTalks.id, parseInt(req.params.id)))
+      .limit(1);
+
+    if (!talk) {
+      return res.status(404).json({ message: "Talk not found" });
+    }
+
+    res.json(talk);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /api/talks - Create new talk
+app.post("/api/talks", requireAuth, async (req, res, next) => {
+  try {
+    const result = insertPastTalkSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+
+    const [newTalk] = await db
+      .insert(pastTalks)
+      .values(result.data)
+      .returning();
+
+    res.status(201).json(newTalk);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT /api/talks/:id - Update talk
+app.put("/api/talks/:id", requireAuth, async (req, res, next) => {
+  try {
+    const result = insertPastTalkSchema.partial().safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+
+    const [updated] = await db
+      .update(pastTalks)
+      .set({ ...result.data, updatedAt: new Date() })
+      .where(eq(pastTalks.id, parseInt(req.params.id)))
+      .returning();
+
+    if (!updated) {
+      return res.status(404).json({ message: "Talk not found" });
+    }
+
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/talks/:id - Delete talk
+app.delete("/api/talks/:id", requireAuth, async (req, res, next) => {
+  try {
+    const [deleted] = await db
+      .delete(pastTalks)
+      .where(eq(pastTalks.id, parseInt(req.params.id)))
+      .returning();
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Talk not found" });
+    }
+
+    res.json({ message: "Talk deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
 
   // Research Routes
   app.get("/api/research", async (req, res, next) => {
@@ -308,39 +395,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/research", requireAuth, async (req, res, next) => {
-    try {
-      const result = insertResearchSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid input" });
-      }
+  // POST /api/research - Create with file uploads
 
-      const [newPaper] = await db.insert(research).values(result.data).returning();
-      res.json(newPaper);
-    } catch (error) {
-      next(error);
+
+  app.post("/api/research", upload.fields([
+  { name: 'pdf', maxCount: 1 },
+  { name: 'thumbnail', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const data = { ...req.body };
+    
+    // Parse tags
+    if (data.tags && typeof data.tags === 'string') {
+      data.tags = JSON.parse(data.tags);
+    } else {
+      data.tags = [];
     }
-  });
-
-  app.put("/api/research/:id", requireAuth, async (req, res, next) => {
-    try {
-      const result = insertResearchSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid input" });
+    
+    // Parse boolean
+    data.featured = data.featured === 'true';
+    
+    // Parse number
+    data.order = parseInt(data.order) || 0;
+    
+    // Upload files and get URLs
+    if (files?.pdf?.[0]) {
+      data.pdfUrl = await objectStorage.uploadFile(files.pdf[0], 'research/pdfs');
+    }
+    
+    if (files?.thumbnail?.[0]) {
+      data.thumbnailUrl = await objectStorage.uploadFile(files.thumbnail[0], 'research/images');
+    }
+    
+    // Clean up empty strings - set to undefined so DB defaults/nulls work
+    Object.keys(data).forEach(key => {
+      if (data[key] === '' || data[key] === 'null') {
+        data[key] = undefined;
       }
+    });
+    
+    console.log('Final data:', data);
+    
+    const [newResearch] = await db.insert(research).values(data).returning();
+    res.json(newResearch);
+  } catch (error) {
+    console.error('Error creating research:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+  
 
-      const [updated] = await db
-        .update(research)
-        .set({ ...result.data, updatedAt: new Date() })
+// Research Analytics Routes
+app.post("/api/research/:id/view", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    // Update view count atomically
+    await db
+      .update(research)
+      .set({
+        viewCount: sql`${research.viewCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(research.id, id));
+
+    res.json({ 
+      success: true, 
+      message: "View count updated successfully" 
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/research/:id/download", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    // Update download count atomically
+    await db
+      .update(research)
+      .set({
+        downloadCount: sql`${research.downloadCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(research.id, id));
+
+    res.json({ 
+      success: true, 
+      message: "Download count updated successfully" 
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+  // PUT /api/research/:id - Update with file uploads
+  app.put("/api/research/:id", upload.fields([
+    { name: 'pdf', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 }
+  ]), async (req, res) => {
+    try {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const data = { ...req.body };
+      
+      // Parse and clean up the data (same as POST)
+      if (data.tags) {
+        try {
+          data.tags = JSON.parse(data.tags);
+        } catch {
+          data.tags = [];
+        }
+      }
+      
+      data.featured = data.featured === 'true';
+      data.order = parseInt(data.order) || 0;
+      
+      if (!data.venue || data.venue === '') data.venue = null;
+      if (!data.pdfUrl || data.pdfUrl === '') data.pdfUrl = null;
+      if (!data.externalLink || data.externalLink === '') data.externalLink = null;
+      if (!data.thumbnailUrl || data.thumbnailUrl === '') data.thumbnailUrl = null;
+      if (!data.citation || data.citation === '') data.citation = null;
+      
+      // Upload new files if provided
+      if (files?.pdf && files.pdf[0]) {
+        data.pdfUrl = await objectStorage.uploadFile(files.pdf[0], 'research/pdfs');
+      }
+      
+      if (files?.thumbnail && files.thumbnail[0]) {
+        data.thumbnailUrl = await objectStorage.uploadFile(files.thumbnail[0], 'research/images');
+      }
+      
+      console.log('Update data:', data); // Debug log
+      
+      const [updated] = await db.update(research)
+        .set(data)
         .where(eq(research.id, req.params.id))
         .returning();
-
+      
       res.json(updated);
     } catch (error) {
-      next(error);
+      console.error('Error updating research:', error);
+      res.status(500).json({ message: error.message });
     }
   });
 
+  
   app.delete("/api/research/:id", requireAuth, async (req, res, next) => {
     try {
       await db.delete(research).where(eq(research.id, req.params.id));
@@ -487,61 +688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Event Routes
-  app.get("/api/events", async (req, res, next) => {
-    try {
-      const allEvents = await db
-        .select()
-        .from(events)
-        .orderBy(events.order);
-      res.json(allEvents);
-    } catch (error) {
-      next(error);
-    }
-  });
 
-  app.post("/api/events", requireAuth, async (req, res, next) => {
-    try {
-      const result = insertEventSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid input" });
-      }
-
-      const [newEvent] = await db.insert(events).values(result.data).returning();
-      res.json(newEvent);
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  app.put("/api/events/:id", requireAuth, async (req, res, next) => {
-    try {
-      const updateSchema = insertEventSchema.partial().omit({ id: true, createdAt: true, updatedAt: true });
-      const result = updateSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid input" });
-      }
-
-      const [updated] = await db
-        .update(events)
-        .set({ ...result.data, updatedAt: new Date() })
-        .where(eq(events.id, req.params.id))
-        .returning();
-
-      res.json(updated);
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  app.delete("/api/events/:id", requireAuth, async (req, res, next) => {
-    try {
-      await db.delete(events).where(eq(events.id, req.params.id));
-      res.json({ message: "Deleted" });
-    } catch (error) {
-      next(error);
-    }
-  });
 
   // Experience Position Routes
   app.get("/api/experience", async (req, res, next) => {

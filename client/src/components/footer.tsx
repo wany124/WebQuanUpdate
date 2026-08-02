@@ -5,14 +5,25 @@ import { Textarea } from "./ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertContactMessageSchema } from "@shared/schema";
-import type { InsertContactMessage } from "@shared/schema";
-import { useMutation } from "@tanstack/react-query";
+import type { InsertContactMessage, PersonalInfo } from "@shared/schema";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./ui/form";
 
 export function Footer() {
   const { toast } = useToast();
+
+  const { data: personalInfo } = useQuery<PersonalInfo>({
+    queryKey: ["/api/personal-info"],
+  });
 
   const form = useForm<InsertContactMessage>({
     resolver: zodResolver(insertContactMessageSchema),
@@ -50,54 +61,72 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-slate-900 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="dark bg-[#282b34] text-white border-t border-white/10">
+      <div className="max-w-[68em] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Contact Information */}
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-6">Contact Information</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">
+              Contact Information
+            </h3>
             <div className="space-y-4 text-muted-foreground">
-              <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium text-foreground">Email</p>
-                  <a 
-                    href="mailto:professor@university.edu" 
-                    className="hover:text-primary transition-colors"
-                    data-testid="link-email"
-                  >
-                    professor@university.edu
-                  </a>
+              {personalInfo?.email && (
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">Email</p>
+                    <a
+                      href={`mailto:${personalInfo.email}`}
+                      className="hover:text-primary transition-colors"
+                      data-testid="link-email"
+                    >
+                      {personalInfo.email}
+                    </a>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium text-foreground">Office</p>
-                  <p data-testid="text-office">Department of Mathematics<br />University Campus, Building 101</p>
+              )}
+              {personalInfo?.officeLocation && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">Office</p>
+                    <p
+                      data-testid="text-office"
+                      className="whitespace-pre-line"
+                    >
+                      {personalInfo.officeLocation}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium text-foreground">Phone</p>
-                  <a 
-                    href="tel:+1234567890" 
-                    className="hover:text-primary transition-colors"
-                    data-testid="link-phone"
-                  >
-                    +1 (234) 567-890
-                  </a>
+              )}
+              {personalInfo?.phone && (
+                <div className="flex items-start gap-3">
+                  <Phone className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">Phone</p>
+                    <a
+                      href={`tel:${personalInfo.phone.replace(/[^0-9+]/g, "")}`}
+                      className="hover:text-primary transition-colors"
+                      data-testid="link-phone"
+                    >
+                      {personalInfo.phone}
+                    </a>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
           {/* Contact Form */}
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-6">Send a Message</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">
+              Send a Message
+            </h3>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="name"
@@ -105,7 +134,11 @@ export function Footer() {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your name" {...field} data-testid="input-contact-name" />
+                        <Input
+                          placeholder="Your name"
+                          {...field}
+                          data-testid="input-contact-name"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -118,7 +151,12 @@ export function Footer() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="your.email@example.com" {...field} data-testid="input-contact-email" />
+                        <Input
+                          type="email"
+                          placeholder="your.email@example.com"
+                          {...field}
+                          data-testid="input-contact-email"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -131,7 +169,11 @@ export function Footer() {
                     <FormItem>
                       <FormLabel>Subject</FormLabel>
                       <FormControl>
-                        <Input placeholder="Subject (optional)" {...field} data-testid="input-contact-subject" />
+                        <Input
+                          placeholder="Subject (optional)"
+                          {...field}
+                          data-testid="input-contact-subject"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -144,10 +186,10 @@ export function Footer() {
                     <FormItem>
                       <FormLabel>Message</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Your message" 
-                          className="min-h-[120px] resize-none" 
-                          {...field} 
+                        <Textarea
+                          placeholder="Your message"
+                          className="min-h-[120px] resize-none"
+                          {...field}
                           data-testid="input-contact-message"
                         />
                       </FormControl>
@@ -155,8 +197,8 @@ export function Footer() {
                     </FormItem>
                   )}
                 />
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full"
                   disabled={contactMutation.isPending}
                   data-testid="button-send-message"
@@ -168,8 +210,23 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-slate-800 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Academic Portfolio. All rights reserved.</p>
+        <div className="mt-12 pt-8 border-t border-border text-center text-sm text-muted-foreground">
+          <p>
+            &copy; All rights reserved Zhiyu Quan {new Date().getFullYear()}.
+          </p>
+          <a
+            href="https://clustrmaps.com/site/1bu06"
+            title="Visit tracker"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mt-4"
+          >
+            <img
+              src="//www.clustrmaps.com/map_v2.png?d=SYRzygw20kVwYYbfOw3aYjYpxNLsCHAj9n_mKxNhKKQ&cl=ffffff"
+              alt="Visitor map"
+              loading="lazy"
+            />
+          </a>
         </div>
       </div>
     </footer>

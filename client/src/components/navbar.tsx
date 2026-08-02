@@ -20,23 +20,20 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="text-lg font-semibold text-foreground hover-elevate px-2 py-1 rounded-md transition-colors" data-testid="link-home-logo">
-            DATA SCIENCE APPLICATION IN ACTUARIAL SCIENCE
-          </Link>
-
-          {/* Desktop Navigation */}
+    <nav className="relative z-10 pt-5 pb-2 bg-[#2c3340]">
+      <div className="max-w-[68em] mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+        {/* Floating pill — translucent, thin border */}
+        <div className="flex items-center gap-1 px-3 py-1.5 rounded border border-white/15 bg-transparent">
+          {/* Desktop links */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path}>
                 <Button
                   variant="ghost"
-                  className={`text-sm tracking-wide ${
+                  className={`text-xs tracking-[0.25em] uppercase font-normal px-4 hover:bg-transparent ${
                     isActive(link.path)
-                      ? "text-primary border-b-2 border-primary rounded-none"
-                      : "text-muted-foreground"
+                      ? "text-white"
+                      : "text-white/65 hover:text-white"
                   }`}
                   data-testid={`link-nav-${link.label.toLowerCase()}`}
                 >
@@ -46,11 +43,11 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile menu button */}
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="button-mobile-menu"
           >
@@ -59,18 +56,18 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-slate-900 border-t border-slate-800">
+        <div className="md:hidden mt-2 mx-4 rounded border border-white/25 bg-background/80 backdrop-blur-sm">
           <div className="px-4 py-4 space-y-2">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path}>
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start text-sm tracking-wide ${
+                  className={`w-full justify-start text-xs tracking-[0.25em] uppercase font-semibold ${
                     isActive(link.path)
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground"
+                      ? "text-white"
+                      : "text-white/70 hover:text-white"
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                   data-testid={`link-mobile-${link.label.toLowerCase()}`}

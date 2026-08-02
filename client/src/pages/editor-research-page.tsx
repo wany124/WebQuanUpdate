@@ -11,13 +11,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertResearchSchema, type InsertResearch, type Research } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit, Trash2 } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
 
 export default function EditorResearchPage() {
   const { toast } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
 
   const { data: research = [], isLoading } = useQuery<Research[]>({
     queryKey: ["/api/research"],
@@ -44,17 +46,48 @@ export default function EditorResearchPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (data: InsertResearch) => {
-      const res = await apiRequest(
-        editingId ? "PUT" : "POST",
+      // Create FormData for file uploads
+      const formData = new FormData();
+      
+      // Add all text fields
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      // Add files if selected
+      if (pdfFile) {
+        formData.append('pdf', pdfFile);
+      }
+      if (thumbnailFile) {
+        formData.append('thumbnail', thumbnailFile);
+      }
+
+      const res = await fetch(
         editingId ? `/api/research/${editingId}` : "/api/research",
-        data
+        {
+          method: editingId ? "PUT" : "POST",
+          body: formData,
+        }
       );
+      
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      
       return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/research"] });
       setEditingId(null);
       setShowForm(false);
+      setPdfFile(null);
+      setThumbnailFile(null);
       form.reset();
       toast({ title: "Success", description: editingId ? "Research updated" : "Research added" });
     },
@@ -79,6 +112,8 @@ export default function EditorResearchPage() {
   const startEdit = (item: Research) => {
     setEditingId(item.id);
     setShowForm(true);
+    setPdfFile(null);
+    setThumbnailFile(null);
     form.reset({
       title: item.title,
       authors: item.authors,
@@ -116,7 +151,13 @@ export default function EditorResearchPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-foreground">Manage Research</h1>
           <Button 
-            onClick={() => { setShowForm(!showForm); setEditingId(null); form.reset(); }}
+            onClick={() => { 
+              setShowForm(!showForm); 
+              setEditingId(null); 
+              setPdfFile(null);
+              setThumbnailFile(null);
+              form.reset(); 
+            }}
             data-testid="button-add-research"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -136,6 +177,7 @@ export default function EditorResearchPage() {
                     <FormMessage />
                   </FormItem>
                 )} />
+                
                 <FormField control={form.control} name="authors" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Authors</FormLabel>
@@ -143,6 +185,7 @@ export default function EditorResearchPage() {
                     <FormMessage />
                   </FormItem>
                 )} />
+                
                 <div className="grid grid-cols-2 gap-4">
                   <FormField control={form.control} name="venue" render={({ field }) => (
                     <FormItem>
@@ -159,6 +202,7 @@ export default function EditorResearchPage() {
                     </FormItem>
                   )} />
                 </div>
+                
                 <FormField control={form.control} name="abstract" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Abstract</FormLabel>
@@ -166,13 +210,25 @@ export default function EditorResearchPage() {
                     <FormMessage />
                   </FormItem>
                 )} />
+                
                 <FormField control={form.control} name="category" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl><Input {...field} data-testid="input-category" /></FormControl>
+                    <FormLabel>Categories (comma-separated)</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={Array.isArray(field.value) ? field.value.join(", ") : field.value || ""}
+                        onChange={(e) => {
+                          const categories = e.target.value.split(",").map(c => c.trim()).filter(Boolean);
+                          field.onChange(categories);
+                        }}
+                        data-testid="input-category"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
+
+                
                 <FormField control={form.control} name="tags" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tags (comma-separated)</FormLabel>
@@ -189,6 +245,7 @@ export default function EditorResearchPage() {
                     <FormMessage />
                   </FormItem>
                 )} />
+                
                 <FormField control={form.control} name="citation" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Citation (formatted bibliographic reference)</FormLabel>
@@ -198,29 +255,64 @@ export default function EditorResearchPage() {
                     <FormMessage />
                   </FormItem>
                 )} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="pdfUrl" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>PDF URL</FormLabel>
-                      <FormControl><Input {...field} value={field.value || ""} placeholder="https://..." data-testid="input-pdf-url" /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="externalLink" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>DOI / External Link</FormLabel>
-                      <FormControl><Input {...field} value={field.value || ""} placeholder="https://doi.org/..." data-testid="input-external-link" /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+
+                {/* PDF File Upload */}
+                <div className="space-y-2">
+                  <FormLabel>PDF File</FormLabel>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setPdfFile(file);
+                      }}
+                      data-testid="input-pdf-file"
+                    />
+                    {pdfFile && (
+                      <span className="text-sm text-muted-foreground">{pdfFile.name}</span>
+                    )}
+                  </div>
+                  {form.getValues('pdfUrl') && (
+                    <p className="text-sm text-muted-foreground">
+                      Current: <a href={form.getValues('pdfUrl')} target="_blank" rel="noopener noreferrer" className="underline">View PDF</a>
+                    </p>
+                  )}
                 </div>
-                <FormField control={form.control} name="thumbnailUrl" render={({ field }) => (
+
+                {/* Thumbnail/Image Upload */}
+                <div className="space-y-2">
+                  <FormLabel>Thumbnail/Diagram Image</FormLabel>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setThumbnailFile(file);
+                      }}
+                      data-testid="input-thumbnail-file"
+                    />
+                    {thumbnailFile && (
+                      <span className="text-sm text-muted-foreground">{thumbnailFile.name}</span>
+                    )}
+                  </div>
+                  {form.getValues('thumbnailUrl') && (
+                    <div className="mt-2">
+                      <p className="text-sm text-muted-foreground mb-2">Current image:</p>
+                      <img src={form.getValues('thumbnailUrl')} alt="Current thumbnail" className="h-24 w-auto rounded" />
+                    </div>
+                  )}
+                </div>
+                
+                <FormField control={form.control} name="externalLink" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image/Diagram URL</FormLabel>
-                    <FormControl><Input {...field} value={field.value || ""} placeholder="https://..." data-testid="input-thumbnail-url" /></FormControl>
+                    <FormLabel>DOI / External Link (optional)</FormLabel>
+                    <FormControl><Input {...field} value={field.value || ""} placeholder="https://doi.org/..." data-testid="input-external-link" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
+                
                 <FormField control={form.control} name="featured" render={({ field }) => (
                   <FormItem className="flex items-center gap-2">
                     <FormControl>
@@ -229,6 +321,7 @@ export default function EditorResearchPage() {
                     <FormLabel className="!mt-0">Featured on homepage</FormLabel>
                   </FormItem>
                 )} />
+                
                 <div className="flex gap-2">
                   <Button type="submit" disabled={saveMutation.isPending} data-testid="button-save-research">
                     {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}

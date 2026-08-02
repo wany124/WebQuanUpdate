@@ -7,12 +7,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema, type InsertUser } from "@shared/schema";
 import { Redirect } from "wouter";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Loader2, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AuthPage() {
-  const { user, isLoading, loginMutation, registerMutation } = useAuth();
-  const [isRegister, setIsRegister] = useState(false);
+  const { user, isLoading, loginMutation } = useAuth();
 
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
@@ -35,11 +34,7 @@ export default function AuthPage() {
   }
 
   const onSubmit = (data: InsertUser) => {
-    if (isRegister) {
-      registerMutation.mutate(data);
-    } else {
-      loginMutation.mutate(data);
-    }
+    loginMutation.mutate(data);
   };
 
   return (
@@ -48,14 +43,23 @@ export default function AuthPage() {
       <div className="flex-1 flex items-center justify-center p-8">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-2xl">{isRegister ? "Create Account" : "Editor Login"}</CardTitle>
+            <CardTitle className="text-2xl">Admin Login</CardTitle>
             <CardDescription>
-              {isRegister ? "Register to access the editor" : "Sign in to manage the portfolio content"}
+              Sign in to manage the portfolio content
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                {loginMutation.isError && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Invalid credentials. Please try again.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 <FormField
                   control={form.control}
                   name="username"
@@ -63,12 +67,18 @@ export default function AuthPage() {
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input placeholder="username" {...field} data-testid="input-username" />
+                        <Input 
+                          placeholder="Enter admin username" 
+                          {...field} 
+                          data-testid="input-username"
+                          autoComplete="username"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                
                 <FormField
                   control={form.control}
                   name="password"
@@ -76,45 +86,45 @@ export default function AuthPage() {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} data-testid="input-password" />
+                        <Input 
+                          type="password" 
+                          placeholder="••••••••" 
+                          {...field} 
+                          data-testid="input-password"
+                          autoComplete="current-password"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={loginMutation.isPending || registerMutation.isPending}
-                  data-testid={isRegister ? "button-register" : "button-login"}
+                  disabled={loginMutation.isPending}
+                  data-testid="button-login"
                 >
-                  {(loginMutation.isPending || registerMutation.isPending) ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  {loginMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Signing in...
+                    </>
                   ) : (
-                    isRegister ? "Register" : "Sign In"
+                    "Sign In"
                   )}
                 </Button>
               </form>
             </Form>
-            <div className="mt-4 text-center text-sm">
-              <Button
-                variant="link"
-                className="text-muted-foreground"
-                onClick={() => setIsRegister(!isRegister)}
-                data-testid="button-toggle-auth"
-              >
-                {isRegister ? "Already have an account? Sign in" : "Need an account? Register"}
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Hero Column */}
-      <div className="hidden lg:flex flex-1 bg-slate-900 items-center justify-center p-12">
+      <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-12">
         <div className="max-w-md text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Content Management System</h1>
-          <p className="text-lg text-slate-300">
+          <h1 className="text-4xl font-bold text-primary-foreground mb-4">Content Management System</h1>
+          <p className="text-lg text-primary-foreground/85">
             Manage your academic portfolio with ease. Edit personal information, research publications, teaching courses, and student profiles.
           </p>
         </div>

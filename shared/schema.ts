@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -45,12 +45,30 @@ export const carouselImages = pgTable("carousel_images", {
   imageUrl: text("image_url").notNull(),
   caption: text("caption"),
   order: integer("order").notNull().default(0),
+  pdfUrl: text("pdf_url"),
+  pdfTitle: text("pdf_title"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertCarouselImageSchema = createInsertSchema(carouselImages).omit({ id: true, createdAt: true });
-export type InsertCarouselImage = z.infer<typeof insertCarouselImageSchema>;
+export const pastTalks = pgTable("past_talks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  date: timestamp("date").notNull(), // When the talk was given
+  conference: text("conference"), // Optional conference name
+  pdfUrl: text("pdf_url").notNull(), // Link to slides
+  description: text("description"), // Optional description
+  talkType: varchar("talk_type", { length: 50 }), // e.g., "Seminar", "Conference", "Workshop"
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+
 export type CarouselImage = typeof carouselImages.$inferSelect;
+export type InsertCarouselImage = typeof carouselImages.$inferInsert;
+
+export type PastTalk = typeof pastTalks.$inferSelect;
+export type InsertPastTalk = typeof pastTalks.$inferInse
 
 // Research papers and projects
 export const research = pgTable("research", {
@@ -63,16 +81,28 @@ export const research = pgTable("research", {
   pdfUrl: text("pdf_url"),
   externalLink: text("external_link"),
   thumbnailUrl: text("thumbnail_url"),
-  citation: text("citation"), // formatted citation text for copy-to-clipboard
-  category: text("category").notNull(),
-  tags: text("tags").array(),
+  citation: text("citation"),
+  category: jsonb("category").notNull().default(sql`'[]'::jsonb`),
+  tags: text("tags").array().default(sql`'{}'::text[]`), // Default empty array
   featured: boolean("featured").default(false),
   order: integer("order").notNull().default(0),
+  viewCount: integer("view_count").notNull().default(0),
+  downloadCount: integer("download_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertResearchSchema = createInsertSchema(research).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertResearchSchema = createInsertSchema(research)
+  .omit({ id: true, createdAt: true, updatedAt: true })
+  .extend({
+    venue: z.string().optional().nullable(),
+    pdfUrl: z.string().optional().nullable(),
+    externalLink: z.string().optional().nullable(),
+    thumbnailUrl: z.string().optional().nullable(),
+    citation: z.string().optional().nullable(),
+    tags: z.array(z.string()).optional().default([]),
+  });
+
 export type InsertResearch = z.infer<typeof insertResearchSchema>;
 export type Research = typeof research.$inferSelect;
 
@@ -153,6 +183,24 @@ export const experiencePositions = pgTable("experience_positions", {
   order: integer("order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCarouselImageSchema = z.object({
+  imageUrl: z.string().min(1),  // ← Change from .url() to .min(1)
+  caption: z.string().optional(),
+  order: z.number(),
+  pdfUrl: z.string().min(1).optional(),  
+  pdfTitle: z.string().optional(),        
+});
+
+
+export const insertPastTalkSchema = z.object({
+  title: z.string().min(1),
+  date: z.coerce.date(),
+  conference: z.string().optional(),
+  pdfUrl: z.string().min(1), 
+  description: z.string().optional(),
+  talkType: z.string().optional(),
 });
 
 export const insertExperiencePositionSchema = createInsertSchema(experiencePositions).omit({ id: true, createdAt: true, updatedAt: true });

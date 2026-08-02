@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/navbar";
+import { PageHeader } from "@/components/page-header";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, FileText } from "lucide-react";
@@ -15,15 +16,10 @@ export default function TeachingPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Header - Title integrated into gradient background */}
-      <div className="bg-gradient-to-b from-slate-900 to-background py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Teaching</h1>
-          <p className="text-lg text-muted-foreground max-w-3xl">
-            Current and recent courses in actuarial science, data science, and computational statistics.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="DATA SCIENCE APPLICATION IN ACTUARIAL SCIENCE"
+        sectionLabel="Teaching"
+      />
 
       {/* Courses - Natural flow without card containers */}
       <section className="py-12 md:py-16">

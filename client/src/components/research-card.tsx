@@ -4,12 +4,15 @@ import { Button } from "./ui/button";
 import type { Research } from "@shared/schema";
 import { Link } from "wouter";
 import { Badge } from "./ui/badge";
+import { useResearchAnalytics } from "@/hooks/use-research-analytics";
 
 interface ResearchCardProps {
   research: Research;
 }
 
 export function ResearchCard({ research }: ResearchCardProps) {
+  const { trackView, trackDownload } = useResearchAnalytics();
+
   return (
     <Card className="h-full hover:shadow-lg transition-shadow" data-testid={`card-research-${research.id}`}>
       {research.thumbnailUrl && (
@@ -54,7 +57,7 @@ export function ResearchCard({ research }: ResearchCardProps) {
         <div className="flex flex-wrap gap-2">
           {research.pdfUrl && (
             <Button variant="outline" size="sm" asChild data-testid={`button-pdf-${research.id}`}>
-              <a href={research.pdfUrl} target="_blank" rel="noopener noreferrer">
+              <a href={research.pdfUrl} target="_blank" rel="noopener noreferrer" onClick={()=>trackDownload(research.id)}>
                 <FileText className="h-4 w-4 mr-1" />
                 PDF
               </a>
@@ -69,7 +72,7 @@ export function ResearchCard({ research }: ResearchCardProps) {
             </Button>
           )}
           <Button variant="default" size="sm" asChild data-testid={`button-details-${research.id}`}>
-            <Link href={`/research/${research.id}`}>
+            <Link href={`/research/${research.id}`} onClick={()=> trackView(research.id)}>
               Details
             </Link>
           </Button>

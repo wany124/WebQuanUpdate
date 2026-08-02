@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/navbar";
+import { PageHeader } from "@/components/page-header";
 import { Footer } from "@/components/footer";
 import { Loader2, ExternalLink, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -8,33 +9,34 @@ import type { Research } from "@shared/schema";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { Link } from "wouter";
+import { useResearchAnalytics } from "@/hooks/use-research-analytics";
+
 
 export default function ResearchPage() {
+  const { trackView, trackDownload } = useResearchAnalytics();
+
+  
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   
   const { data: allResearch = [], isLoading } = useQuery<Research[]>({
     queryKey: ["/api/research"],
   });
 
-  const categories = ["all", ...new Set(allResearch.map(r => r.category))];
+  const categories = ["all", ...Array.from(new Set(allResearch.flatMap(r => r.category.map(c => c.trim())))).sort()];
   
-  const filteredResearch = categoryFilter === "all" 
-    ? allResearch 
-    : allResearch.filter(r => r.category === categoryFilter);
+  const filteredResearch = categoryFilter === "all"
+    ? allResearch
+    : allResearch.filter(r => r.category.some(c => c.trim() === categoryFilter));
+
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Header - Title integrated into gradient background */}
-      <div className="bg-gradient-to-b from-slate-900 to-background py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Research</h1>
-          <p className="text-lg text-muted-foreground max-w-3xl">
-            Explore publications and research projects in data science, actuarial science, and computational statistics.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="DATA SCIENCE APPLICATION IN ACTUARIAL SCIENCE"
+        sectionLabel="Research"
+      />
 
       {/* Research List */}
       <section className="py-12 md:py-16">
@@ -124,27 +126,33 @@ export default function ResearchPage() {
 
                         {/* Category and Tags - flowing with content */}
                         <div className="flex flex-wrap gap-2 mb-4">
-                          <Badge variant="default" data-testid={`badge-category-${research.id}`}>
-                            {research.category}
-                          </Badge>
-                          {research.tags && research.tags.map((tag, idx) => (
-                            <Badge key={idx} variant="secondary" data-testid={`badge-tag-${research.id}-${idx}`}>
-                              {tag}
+                          {research.category?.map((cat, i) => (
+                            <Badge
+                              key={`${research.id}-cat-${i}`}
+                              variant="default"
+                              data-testid={`badge-category-${research.id}-${i}`}
+                            >
+                              {cat.trim()}
+                            </Badge>
+                          ))}
+
+                          {research.tags?.map((tag, idx) => (
+                            <Badge
+                              key={`${research.id}-tag-${idx}`}
+                              variant="secondary"
+                              data-testid={`badge-tag-${research.id}-${idx}`}
+                            >
+                              {tag.trim?.() ?? tag}
                             </Badge>
                           ))}
                         </div>
 
-                        {/* Abstract */}
-                        {research.abstract && (
-                          <p className="text-foreground leading-relaxed mb-6" data-testid={`text-description-${research.id}`}>
-                            {research.abstract}
-                          </p>
-                        )}
+
 
                         {/* Action Buttons */}
                         <div className="flex flex-wrap gap-3 mt-auto">
                           <Button variant="default" asChild data-testid={`button-learn-more-${research.id}`}>
-                            <Link href={`/research/${research.id}`}>
+                            <Link href={`/research/${research.id}`}  onClick={()=>trackView(research.id)}>
                               Learn More
                             </Link>
                           </Button>
@@ -158,7 +166,7 @@ export default function ResearchPage() {
                           )}
                           {research.pdfUrl && (
                             <Button variant="outline" asChild data-testid={`button-pdf-${research.id}`}>
-                              <a href={research.pdfUrl} target="_blank" rel="noopener noreferrer">
+                              <a href={research.pdfUrl} target="_blank" rel="noopener noreferrer" onClick={()=>trackDownload(research.id)}>
                                 View PDF
                                 <ExternalLink className="ml-2 h-4 w-4" />
                               </a>
