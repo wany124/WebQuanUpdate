@@ -126,11 +126,14 @@ service + Postgres + a persistent volume (for `uploads/`, mounted at
 the app's working directory) all live under one project, at roughly
 $5-15/month for a hobby-scale app. It doesn't have an ongoing free
 tier (only a one-time trial credit for new accounts), so budget for
-that if you go this route. Fly.io is a better fit if you specifically
-need global multi-region low latency, which a personal academic site
-almost never does — it also currently has no free tier and its
-cheapest managed Postgres option is comparatively expensive, with the
-cheap self-managed option putting backups/maintenance on you.
+that if you go this route. **See `RAILWAY.md` for exact click-by-click
+steps if you go with Railway**, including a Railway-specific SSL
+gotcha with its default Postgres image. Fly.io is a better fit if you
+specifically need global multi-region low latency, which a personal
+academic site almost never does — it also currently has no free tier
+and its cheapest managed Postgres option is comparatively expensive,
+with the cheap self-managed option putting backups/maintenance on
+you.
 
 ### Steps
 
@@ -147,9 +150,10 @@ cheap self-managed option putting backups/maintenance on you.
    npm run db:restore -- ./backups/webquan-<timestamp>.backup "<hosted-database-url>"
    ```
 
-   (`pg_restore --no-owner --clean --if-exists`, wrapped for you —
-   `--no-owner` matters because the roles on your local machine won't
-   exist on the hosted DB.)
+   (`pg_restore --no-owner --no-acl --clean --if-exists`, wrapped for
+   you — `--no-owner`/`--no-acl` matter because the roles and
+   grant/revoke rules on your local machine won't exist on the hosted
+   DB.)
 
 4. **Set environment variables** on the host:
 

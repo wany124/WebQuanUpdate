@@ -13,6 +13,11 @@ set -euo pipefail
 # the target database before restoring. Only point this at a database
 # you intend to fully overwrite (e.g. a freshly provisioned staging or
 # production database that you are populating for the first time).
+#
+# --no-owner and --no-acl skip restoring role ownership and
+# grant/revoke statements from the source database, since those roles
+# usually don't exist on the target (e.g. your local Postgres user
+# won't exist on a hosted database).
 
 cd "$(dirname "$0")/.."
 
@@ -47,5 +52,5 @@ if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
   exit 1
 fi
 
-pg_restore --no-owner --clean --if-exists -d "$TARGET_URL" "$BACKUP_FILE"
+pg_restore --no-owner --no-acl --clean --if-exists -d "$TARGET_URL" "$BACKUP_FILE"
 echo "Restore complete."
