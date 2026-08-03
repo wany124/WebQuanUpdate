@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, type PoolConfig } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 import dotenv from "dotenv";
@@ -10,5 +10,19 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Managed Postgres providers (Render, Railway, Neon, Supabase, RDS, etc.)
+// generally require SSL and present certs that node's default TLS trust
+// store won't validate. Local/dev Postgres typically has no SSL configured
+// at all, so we only enable it in production unless explicitly overridden
+// via PGSSL=true|false.
+const shouldUseSsl =
+  process.env.PGSSL === "true" ||
+  (process.env.PGSSL !== "false" && process.env.NODE_ENV === "production");
+
+const poolConfig: PoolConfig = {
+  connectionString: process.env.DATABASE_URL,
+  ...(shouldUseSsl ? { ssl: { rejectUnauthorized: false } } : {}),
+};
+
+export const pool = new Pool(poolConfig);
 export const db = drizzle({ client: pool, schema });

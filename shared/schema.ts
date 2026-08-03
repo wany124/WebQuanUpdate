@@ -68,7 +68,7 @@ export type CarouselImage = typeof carouselImages.$inferSelect;
 export type InsertCarouselImage = typeof carouselImages.$inferInsert;
 
 export type PastTalk = typeof pastTalks.$inferSelect;
-export type InsertPastTalk = typeof pastTalks.$inferInse
+export type InsertPastTalk = typeof pastTalks.$inferInsert;
 
 // Research papers and projects
 export const research = pgTable("research", {
@@ -82,7 +82,7 @@ export const research = pgTable("research", {
   externalLink: text("external_link"),
   thumbnailUrl: text("thumbnail_url"),
   citation: text("citation"),
-  category: jsonb("category").notNull().default(sql`'[]'::jsonb`),
+  category: jsonb("category").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   tags: text("tags").array().default(sql`'{}'::text[]`), // Default empty array
   featured: boolean("featured").default(false),
   order: integer("order").notNull().default(0),

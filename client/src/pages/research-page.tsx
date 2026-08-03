@@ -22,11 +22,21 @@ export default function ResearchPage() {
     queryKey: ["/api/research"],
   });
 
-  const categories = ["all", ...Array.from(new Set(allResearch.flatMap(r => r.category.map(c => c.trim())))).sort()];
-  
+  // Defensive against malformed/legacy data: the schema declares category
+  // as string[], but jsonb columns aren't enforced at the DB level, so a
+  // stray string value here shouldn't be able to crash the whole page.
+  const getCategories = (r: Research): string[] => {
+    const raw: unknown = r.category;
+    if (Array.isArray(raw)) return raw.map((c) => String(c).trim());
+    if (typeof raw === "string" && raw.length > 0) return [raw.trim()];
+    return [];
+  };
+
+  const categories = ["all", ...Array.from(new Set(allResearch.flatMap(getCategories))).sort()];
+
   const filteredResearch = categoryFilter === "all"
     ? allResearch
-    : allResearch.filter(r => r.category.some(c => c.trim() === categoryFilter));
+    : allResearch.filter((r) => getCategories(r).includes(categoryFilter));
 
 
   return (
@@ -126,13 +136,13 @@ export default function ResearchPage() {
 
                         {/* Category and Tags - flowing with content */}
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {research.category?.map((cat, i) => (
+                          {getCategories(research).map((cat, i) => (
                             <Badge
                               key={`${research.id}-cat-${i}`}
                               variant="default"
                               data-testid={`badge-category-${research.id}-${i}`}
                             >
-                              {cat.trim()}
+                              {cat}
                             </Badge>
                           ))}
 

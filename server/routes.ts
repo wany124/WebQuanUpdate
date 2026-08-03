@@ -230,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/carousel/:id", requireAuth, async (req, res, next) => {
     try {
-      const result = insertCarouselImageSchema.partial().omit({ id: true, createdAt: true, updatedAt: true }).safeParse(req.body);
+      const result = insertCarouselImageSchema.partial().safeParse(req.body);
       if (!result.success) {
         return res.status(400).json({ message: "Invalid input" });
       }
@@ -277,7 +277,7 @@ app.get("/api/talks/:id", async (req, res, next) => {
     const [talk] = await db
       .select()
       .from(pastTalks)
-      .where(eq(pastTalks.id, parseInt(req.params.id)))
+      .where(eq(pastTalks.id, req.params.id))
       .limit(1);
 
     if (!talk) {
@@ -320,7 +320,7 @@ app.put("/api/talks/:id", requireAuth, async (req, res, next) => {
     const [updated] = await db
       .update(pastTalks)
       .set({ ...result.data, updatedAt: new Date() })
-      .where(eq(pastTalks.id, parseInt(req.params.id)))
+      .where(eq(pastTalks.id, req.params.id))
       .returning();
 
     if (!updated) {
@@ -338,7 +338,7 @@ app.delete("/api/talks/:id", requireAuth, async (req, res, next) => {
   try {
     const [deleted] = await db
       .delete(pastTalks)
-      .where(eq(pastTalks.id, parseInt(req.params.id)))
+      .where(eq(pastTalks.id, req.params.id))
       .returning();
 
     if (!deleted) {
@@ -441,7 +441,7 @@ app.delete("/api/talks/:id", requireAuth, async (req, res, next) => {
     res.json(newResearch);
   } catch (error) {
     console.error('Error creating research:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
   
@@ -537,7 +537,7 @@ app.post("/api/research/:id/download", async (req, res, next) => {
       res.json(updated);
     } catch (error) {
       console.error('Error updating research:', error);
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Internal Server Error" });
     }
   });
 
@@ -719,7 +719,7 @@ app.post("/api/research/:id/download", async (req, res, next) => {
 
   app.put("/api/experience/:id", requireAuth, async (req, res, next) => {
     try {
-      const updateSchema = insertExperiencePositionSchema.partial().omit({ id: true, createdAt: true, updatedAt: true });
+      const updateSchema = insertExperiencePositionSchema.partial();
       const result = updateSchema.safeParse(req.body);
       if (!result.success) {
         return res.status(400).json({ message: "Invalid input" });

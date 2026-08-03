@@ -88,10 +88,16 @@ export default function ResearchDetailPage() {
             <span data-testid="text-venue">{research.venue}</span>
             <span>•</span>
             <span data-testid="text-date">{research.date}</span>
-            {research.category && (
+            {(Array.isArray(research.category) ? research.category : research.category ? [research.category] : []).length > 0 && (
               <>
                 <span>•</span>
-                <Badge variant="secondary" data-testid="badge-category">{research.category}</Badge>
+                <div className="flex flex-wrap gap-2">
+                  {(Array.isArray(research.category) ? research.category : [research.category]).map((cat: string, i: number) => (
+                    <Badge key={i} variant="secondary" data-testid={`badge-category-${i}`}>
+                      {String(cat).trim()}
+                    </Badge>
+                  ))}
+                </div>
               </>
             )}
           </div>
